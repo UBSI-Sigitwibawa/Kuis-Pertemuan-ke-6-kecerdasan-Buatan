@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kuis Robotika – Kecerdasan Buatan Pertemuan ke-6</title>
+<style>
+:root{
+  --navy:#12285a; --navy-d:#0b1838; --ink:#16213a; --muted:#5a6785;
+  --paper:#eef2f8; --card:#ffffff; --line:#d5dcea;
+  --red:#c8102e; --ok:#1c7a4b; --ok-bg:#e5f4ec; --bad:#b3261e; --bad-bg:#fbe9e7;
+  --amber:#8a5a00; --amber-bg:#fff4d6;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;line-height:1.55}
+h1,h2,h3{font-family:Georgia,"Times New Roman",serif;margin:0}
+button,input,select{font:inherit}
+:focus-visible{outline:3px solid #f2b705;outline-offset:2px}
+
+.top{background:var(--navy);color:#fff;border-bottom:4px solid var(--red)}
+.top-in{max-width:1080px;margin:0 auto;padding:16px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.crest{width:46px;height:46px;border-radius:50%;background:#fff;color:var(--navy);display:grid;place-items:center;font-weight:800;font-size:14px;letter-spacing:.5px;border:3px solid var(--red);flex:none}
+.top h1{font-size:1.25rem;line-height:1.25}
+.top p{margin:2px 0 0;font-size:.85rem;opacity:.85}
+.top .who{margin-left:auto;text-align:right;font-size:.85rem}
+.top .who b{display:block;font-size:.95rem}
+
+main{max-width:1080px;margin:0 auto;padding:24px 20px 60px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:24px}
+.hidden{display:none!important}
+
+/* start */
+.start-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:24px;align-items:start}
+.start-grid h2{font-size:1.5rem;margin-bottom:6px}
+.lead{color:var(--muted);margin:0 0 18px}
+.topics{margin:0;padding-left:18px;color:var(--ink);columns:2;column-gap:20px;font-size:.92rem}
+.topics li{margin-bottom:4px;break-inside:avoid}
+label{display:block;font-weight:600;font-size:.9rem;margin:14px 0 5px}
+input[type=text],select{width:100%;padding:11px 12px;border:1.5px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}
+input:focus,select:focus{border-color:var(--navy)}
+.err{color:var(--bad);font-size:.88rem;min-height:1.3em;margin:10px 0 0}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 20px;border-radius:8px;border:1.5px solid var(--navy);background:var(--navy);color:#fff;font-weight:600;cursor:pointer}
+.btn:hover{background:var(--navy-d)}
+.btn.ghost{background:#fff;color:var(--navy)}
+.btn.ghost:hover{background:#eaf0fb}
+.btn.red{background:var(--red);border-color:var(--red)}
+.btn.red:hover{background:#9f0c25}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.btn.block{width:100%;margin-top:20px}
+.rules{margin:0;padding-left:18px;font-size:.9rem;color:var(--muted)}
+.rules li{margin-bottom:6px}
+
+/* quiz */
+.quiz-grid{display:grid;grid-template-columns:1fr 260px;gap:20px;align-items:start}
+.progress{height:8px;background:var(--line);border-radius:99px;overflow:hidden;margin-bottom:8px}
+.progress i{display:block;height:100%;width:0;background:var(--navy);transition:width .25s}
+.meta{display:flex;justify-content:space-between;font-size:.85rem;color:var(--muted);margin-bottom:18px}
+.qno{font-family:Georgia,serif;color:var(--red);font-weight:700;font-size:1rem;margin-bottom:6px}
+.qtext{font-family:Georgia,serif;font-size:1.3rem;line-height:1.4;margin-bottom:20px;max-width:62ch}
+.opts{display:grid;gap:10px}
+.opt{display:flex;gap:12px;align-items:flex-start;text-align:left;width:100%;padding:13px 14px;border:1.5px solid var(--line);border-radius:9px;background:#fff;cursor:pointer;color:var(--ink)}
+.opt:hover{border-color:var(--navy);background:#f5f8fe}
+.opt .k{flex:none;width:28px;height:28px;border-radius:50%;border:1.5px solid var(--navy);display:grid;place-items:center;font-weight:700;font-size:.85rem;color:var(--navy)}
+.opt.sel{border-color:var(--navy);background:#e8effc}
+.opt.sel .k{background:var(--navy);color:#fff}
+.nav{display:flex;justify-content:space-between;gap:10px;margin-top:24px;flex-wrap:wrap}
+.side h3{font-size:1rem;margin-bottom:10px}
+.pal{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.pal button{aspect-ratio:1;border:1.5px solid var(--line);background:#fff;border-radius:7px;font-weight:600;font-size:.82rem;cursor:pointer;color:var(--ink)}
+.pal button.ans{background:var(--navy);border-color:var(--navy);color:#fff}
+.pal button.now{outline:3px solid var(--red);outline-offset:1px}
+.legend{display:flex;gap:14px;font-size:.78rem;color:var(--muted);margin-top:12px}
+.legend span::before{content:"";display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px;border:1.5px solid var(--line);background:#fff}
+.legend .a::before{background:var(--navy);border-color:var(--navy)}
+
+/* result */
+.sum{display:grid;grid-template-columns:auto 1fr;gap:28px;align-items:center}
+.score{width:170px;height:170px;border-radius:50%;border:10px solid var(--navy);display:grid;place-items:center;text-align:center;flex:none}
+.score b{font-family:Georgia,serif;font-size:3.2rem;line-height:1;color:var(--navy);display:block}
+.score small{color:var(--muted);font-size:.8rem}
+.idt{width:100%;border-collapse:collapse;font-size:.93rem}
+.idt td{padding:5px 0;vertical-align:top}
+.idt td:first-child{width:110px;color:var(--muted)}
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.chip{padding:6px 12px;border-radius:99px;font-size:.85rem;font-weight:600;border:1px solid var(--line);background:#fff}
+.chip.ok{background:var(--ok-bg);color:var(--ok);border-color:#b7dfc9}
+.chip.bad{background:var(--bad-bg);color:var(--bad);border-color:#f0c4be}
+.chip.nil{background:var(--amber-bg);color:var(--amber);border-color:#ecd391}
+.pred{font-family:Georgia,serif;font-size:1.25rem;margin:0 0 10px}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.tools{display:flex;gap:8px;align-items:center;margin:26px 0 12px;flex-wrap:wrap}
+.tools h2{font-size:1.3rem;margin-right:auto}
+.seg{padding:7px 14px;border:1.5px solid var(--navy);background:#fff;color:var(--navy);border-radius:99px;font-weight:600;font-size:.85rem;cursor:pointer}
+.seg.on{background:var(--navy);color:#fff}
+.rev{background:#fff;border:1px solid var(--line);border-left:6px solid var(--line);border-radius:9px;padding:18px 20px;margin-bottom:14px;break-inside:avoid;page-break-inside:avoid}
+.rev.ok{border-left-color:var(--ok)}
+.rev.bad{border-left-color:var(--bad)}
+.rev.nil{border-left-color:#d9a400}
+.rev-h{display:flex;justify-content:space-between;gap:10px;margin-bottom:6px;font-weight:700}
+.badge{font-size:.78rem;padding:2px 10px;border-radius:99px;font-weight:700}
+.badge.ok{background:var(--ok-bg);color:var(--ok)}
+.badge.bad{background:var(--bad-bg);color:var(--bad)}
+.badge.nil{background:var(--amber-bg);color:var(--amber)}
+.rq{font-family:Georgia,serif;font-size:1.08rem;margin-bottom:10px}
+.ro{display:flex;gap:10px;padding:7px 10px;border-radius:7px;font-size:.93rem;margin-bottom:4px;border:1px solid transparent}
+.ro .k{font-weight:700;width:20px;flex:none}
+.ro.right{background:var(--ok-bg);border-color:#b7dfc9}
+.ro.wrong{background:var(--bad-bg);border-color:#f0c4be}
+.ro em{font-style:normal;font-size:.78rem;font-weight:700;margin-left:auto;white-space:nowrap}
+.ro.right em{color:var(--ok)}
+.ro.wrong em{color:var(--bad)}
+.why{margin-top:10px;padding:11px 14px;background:#f1f5fc;border-radius:8px;font-size:.92rem}
+.why b{color:var(--navy)}
+
+/* modal */
+.modal{position:fixed;inset:0;background:rgba(10,20,45,.55);display:grid;place-items:center;padding:20px;z-index:50}
+.modal .box{background:#fff;border-radius:12px;padding:24px;max-width:420px;width:100%}
+.modal h3{font-size:1.2rem;margin-bottom:8px}
+.modal p{margin:0 0 18px;color:var(--muted)}
+.modal .row{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+
+.print-only{display:none}
+
+@media (max-width:860px){
+  .start-grid,.quiz-grid{grid-template-columns:1fr}
+  .topics{columns:1}
+  .sum{grid-template-columns:1fr;justify-items:center;text-align:left}
+  .top .who{margin-left:0;text-align:left;width:100%}
+  .qtext{font-size:1.15rem}
+}
+@media (prefers-reduced-motion:reduce){.progress i{transition:none}html{scroll-behavior:auto}}
+
+@media print{
+  @page{margin:14mm}
+  body{background:#fff;font-size:11pt}
+  .top .who,.no-print,.tools,.actions{display:none!important}
+  .top{background:#fff;color:var(--navy);border-bottom:3px solid var(--red)}
+  .top p{opacity:1;color:#333}
+  .crest{border-color:var(--red)}
+  main{padding:10px 0}
+  .card{border:none;padding:0}
+  .print-only{display:block}
+  .rev{box-shadow:none}
+  .score{width:130px;height:130px}
+  .score b{font-size:2.4rem}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-in">
+    <div class="crest" aria-hidden="true">BSI</div>
+    <div>
+      <h1>Kuis Robotika</h1>
+      <p>Kecerdasan Buatan · Pertemuan ke-6 · Universitas Bina Sarana Informatika</p>
+    </div>
+    <div class="who hidden" id="whoBox"><b id="whoName"></b><span id="whoSub"></span></div>
+  </div>
+</header>
+
+<main>
+
+<!-- ============ MULAI ============ -->
+<section id="screenStart" class="card">
+  <div class="start-grid">
+    <div>
+      <h2>Mari uji pemahamanmu tentang robot</h2>
+      <p class="lead">30 soal pilihan ganda dari materi “Mari Mengenal Spesies Saya dari A sampai Z”. Setiap soal dilengkapi pembahasan setelah kuis selesai.</p>
+      <h3 style="font-size:1.05rem;margin-bottom:8px">Cakupan materi</h3>
+      <ul class="topics">
+        <li>Robot vs mesin otomatis</li>
+        <li>Asal istilah robot &amp; robotika</li>
+        <li>Anatomi dan komponen robot</li>
+        <li>Persepsi – kognisi – aksi</li>
+        <li>Siklus interaksi dengan dunia</li>
+        <li>Degrees of Freedom (DOF)</li>
+        <li>Robot industri vs robot otonom</li>
+        <li>Robot medis</li>
+        <li>Studi kasus AIBO, ASIMO, QRIO</li>
+        <li>SLAM</li>
+        <li>Hukum Asimov &amp; keselamatan</li>
+      </ul>
+      <h3 style="font-size:1.05rem;margin:20px 0 8px">Aturan singkat</h3>
+      <ul class="rules">
+        <li>Satu NIM hanya dapat mengerjakan satu kali.</li>
+        <li>Jawaban dapat diubah sebelum menekan “Selesai &amp; kumpulkan”.</li>
+        <li>Nilai = jumlah benar ÷ 30 × 100. Tidak ada pengurangan untuk jawaban salah.</li>
+        <li>Setelah selesai, hasil dapat disimpan sebagai PDF.</li>
+      </ul>
+    </div>
+    <form id="formStart" novalidate>
+      <h2 style="font-size:1.25rem">Data mahasiswa</h2>
+      <label for="inNama">Nama lengkap</label>
+      <input type="text" id="inNama" autocomplete="name" maxlength="80" placeholder="Sesuai data kampus">
+      <label for="inNim">NIM</label>
+      <input type="text" id="inNim" inputmode="numeric" autocomplete="off" maxlength="20" placeholder="Contoh: 19240001">
+      <label for="inProdi">Program studi</label>
+      <select id="inProdi">
+        <option value="">— Pilih program studi —</option>
+        <option>Teknologi Komputer</option>
+        <option>Teknik Informatika</option>
+        <option>Sistem Informasi</option>
+        <option>Sistem Informasi Akuntansi</option>
+        <option>Teknik Industri</option>
+        <option>Sains Data</option>
+        <option>Manajemen Informatika</option>
+        <option>Lainnya</option>
+      </select>
+      <p class="err" id="startErr" role="alert"></p>
+      <button class="btn block" type="submit">Mulai kuis</button>
+    </form>
+  </div>
+</section>
+
+<!-- ============ KUIS ============ -->
+<section id="screenQuiz" class="hidden">
+  <div class="quiz-grid">
+    <div class="card">
+      <div class="progress" aria-hidden="true"><i id="bar"></i></div>
+      <div class="meta"><span id="metaL"></span><span id="metaR"></span></div>
+      <div class="qno" id="qNo"></div>
+      <div class="qtext" id="qText"></div>
+      <div class="opts" id="qOpts" role="radiogroup" aria-label="Pilihan jawaban"></div>
+      <div class="nav">
+        <button class="btn ghost" id="btnPrev" type="button">Sebelumnya</button>
+        <button class="btn" id="btnNext" type="button">Berikutnya</button>
+      </div>
+    </div>
+    <aside class="card side">
+      <h3>Navigasi soal</h3>
+      <div class="pal" id="pal"></div>
+      <div class="legend"><span class="a">Terjawab</span><span>Belum</span></div>
+      <button class="btn red block" id="btnFinish" type="button">Selesai &amp; kumpulkan</button>
+    </aside>
+  </div>
+</section>
+
+<!-- ============ HASIL ============ -->
+<section id="screenResult" class="hidden">
+  <div class="card">
+    <div class="print-only" style="margin-bottom:10px"><h2 style="font-size:1.3rem">Hasil Kuis Robotika – Pertemuan ke-6</h2></div>
+    <div class="sum">
+      <div class="score"><div><b id="rScore">0</b><small>dari 100</small></div></div>
+      <div>
+        <p class="pred" id="rPred"></p>
+        <table class="idt">
+          <tr><td>Nama</td><td id="rNama"></td></tr>
+          <tr><td>NIM</td><td id="rNim"></td></tr>
+          <tr><td>Program studi</td><td id="rProdi"></td></tr>
+          <tr><td>Waktu</td><td id="rTgl"></td></tr>
+        </table>
+        <div class="stats">
+          <span class="chip ok" id="rOk"></span>
+          <span class="chip bad" id="rBad"></span>
+          <span class="chip nil" id="rNil"></span>
+        </div>
+        <div class="actions no-print">
+          <button class="btn" id="btnPdf" type="button">Simpan sebagai PDF</button>
+        </div>
+        <p class="no-print" style="font-size:.82rem;color:var(--muted);margin:10px 0 0">Pada jendela cetak, pilih tujuan “Simpan sebagai PDF” (Save as PDF).</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="tools no-print">
+    <h2>Pembahasan</h2>
+    <button class="seg on" data-f="all" type="button">Semua</button>
+    <button class="seg" data-f="bad" type="button">Salah / kosong</button>
+  </div>
+  <h2 class="print-only" style="margin:18px 0 10px;font-size:1.2rem">Pembahasan</h2>
+  <div id="review"></div>
+</section>
+
+</main>
+
+<div class="modal hidden" id="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+  <div class="box">
+    <h3 id="mTitle"></h3>
+    <p id="mBody"></p>
+    <div class="row">
+      <button class="btn ghost" id="mNo" type="button">Kembali</button>
+      <button class="btn red" id="mYes" type="button">Ya, kumpulkan</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ================= BANK SOAL ================= */
+var Q = [
+{q:"Mengapa mesin cuci di rumah tidak termasuk robot menurut materi?",
+ o:["Karena ukurannya terlalu besar dan tidak dapat dipindahkan","Karena hanya menjalankan rutinitas statis, bukan menentukan tindakan dari informasi yang diterima","Karena tidak menggunakan listrik sebagai sumber daya","Karena tidak memiliki struktur mekanis sama sekali"],
+ a:1,e:"Mesin cuci hanya menjalankan rutinitas yang sudah tetap (statis). Tidak semua mesin otomatis adalah robot: robot memiliki tingkat otonomi tertentu untuk menentukan tindakan berdasarkan informasi yang diterima. Mesin cuci tetap memiliki struktur mekanis dan memakai listrik, sehingga alasan lain keliru."},
+{q:"Lengan industri yang bergerak dengan presisi berdasarkan program dikategorikan sebagai…",
+ o:["Robot otonom","Robot humanoid","Mesin non-robot","Robot terstruktur"],
+ a:3,e:"Lengan industri bergerak mengikuti program yang sudah ditetapkan dalam lingkungan yang terstruktur, sehingga disebut robot terstruktur. Robot otonom justru beradaptasi dengan lingkungan yang berubah."},
+{q:"Robot humanoid yang mampu beradaptasi dengan lingkungan yang berubah termasuk dalam kategori…",
+ o:["Robot otonom","Robot terstruktur","Mesin otomatis statis","Robot yang hanya dikendalikan manual"],
+ a:0,e:"Kemampuan beradaptasi dengan lingkungan yang berubah adalah ciri robot otonom. Robot terstruktur dan mesin statis hanya menjalankan urutan yang sudah ditentukan."},
+{q:"Istilah “robot” pertama kali diciptakan dalam…",
+ o:["Laporan penelitian laboratorium robotika tahun 1960-an","Cerita pendek fiksi ilmiah karya Isaac Asimov","Drama teater R.U.R. karya Karel Čapek pada tahun 1920","Paten mesin industri pertama di sebuah pabrik"],
+ a:2,e:"Istilah “robot” lahir di panggung teater, yaitu dalam drama R.U.R. karya Karel Čapek (1920), bukan di laboratorium. Asimov kemudian dikenal karena mempopulerkan istilah “robotika”."},
+{q:"Kata “robota” dalam bahasa Ceko, asal istilah robot, berarti…",
+ o:["Mesin pintar","Pekerja paksa","Manusia buatan","Penjaga pabrik"],
+ a:1,e:"“Robota” berarti pekerja paksa. Makna inilah yang mendasari istilah robot sebagai mesin yang mengerjakan tugas untuk manusia."},
+{q:"Tokoh yang mempopulerkan istilah “Robotika” (ilmu yang mempelajari robot) melalui cerita pendek fiksi ilmiah adalah…",
+ o:["Karel Čapek","Joseph Engelberger","Alan Turing","Isaac Asimov"],
+ a:3,e:"Isaac Asimov mempopulerkan istilah robotika melalui cerita pendek fiksi ilmiah, sebelum teknologi fisiknya benar-benar ada. Čapek adalah pencipta istilah “robot”."},
+{q:"Menurut diagram Venn “Resep Sejati Sebuah Robot”, tiga unsur yang berpadu membentuk robot adalah…",
+ o:["Struktur mekanis, pengendali/komputasi, dan interaksi lingkungan","Sensor, baterai, dan casing","Algoritma, data, dan jaringan internet","Motor, roda, dan kamera"],
+ a:0,e:"Robot berada di irisan tiga unsur: struktur mekanis (tulang dan rangka), pengendali/komputasi (otak dan logika), serta interaksi lingkungan (tindakan nyata). Tanpa salah satunya, sistem belum utuh sebagai robot."},
+{q:"Definisi robot yang paling sesuai dengan materi adalah…",
+ o:["Mesin apa pun yang berjalan otomatis dengan listrik","Perangkat lunak yang meniru percakapan manusia","Sistem fisik yang menggabungkan mekanisme, kendali, dan interaksi untuk menjalankan tugas","Mesin berbentuk manusia yang dapat berbicara"],
+ a:2,e:"Robot adalah sistem fisik yang menggabungkan mekanisme, kendali, dan interaksi untuk menjalankan tugas. Robot tidak harus berbentuk manusia, dan bukan sekadar perangkat lunak."},
+{q:"Pada ilustrasi “Sinar-X Anatomi Kami”, rangka dan sendi robot diibaratkan sebagai…",
+ o:["Jantung","Tulang","Jiwa","Otak"],
+ a:1,e:"Rangka dan sendi adalah struktur mekanis yang menyokong bentuk fisik, sehingga diibaratkan tulang. Jantung = sumber daya, jiwa = perangkat lunak."},
+{q:"Sumber daya (baterai atau suplai listrik) diibaratkan “jantung” robot karena fungsinya…",
+ o:["Memberikan energi bagi seluruh sistem","Memproses informasi dan mengambil keputusan","Mendeteksi kondisi lingkungan","Membentuk kerangka fisik robot"],
+ a:0,e:"Seperti jantung yang memompa darah, sumber daya menyediakan energi bagi seluruh sistem robot. Memproses informasi adalah tugas pengendali."},
+{q:"Perangkat lunak diibaratkan “jiwa” robot karena berisi…",
+ o:["Rangka dan sendi","Baterai dan kabel","Motor penggerak","Algoritma dan logika yang menjalankan sistem"],
+ a:3,e:"Perangkat lunak memuat algoritma dan logika yang menjalankan sistem, sehingga menjadi “jiwa” yang menghidupkan perangkat keras."},
+{q:"Pada pilar Persepsi, komponen robot yang bertugas mengukur kondisi lingkungan adalah…",
+ o:["Aktuator","Pengendali","Sensor","Rangka"],
+ a:2,e:"Persepsi dilakukan oleh sensor, yaitu alat pengukur kondisi lingkungan, misalnya kamera dan sensor jarak."},
+{q:"Pada pilar Kognisi, proses memproses informasi dan membuat keputusan berdasarkan logika dilakukan oleh…",
+ o:["Sensor","Pengendali","Aktuator","Baterai"],
+ a:1,e:"Kognisi dijalankan oleh pengendali yang memproses informasi dari sensor lalu memutuskan tindakan berdasarkan logika."},
+{q:"Manakah yang termasuk contoh aktuator?",
+ o:["Motor penggerak dan roda","Kamera dan sensor jarak","Mikrokontroler pengolah data","Baterai lithium"],
+ a:0,e:"Aktuator menghasilkan gerakan atau tindakan nyata, contohnya motor penggerak dan roda. Kamera dan sensor jarak adalah sensor, mikrokontroler adalah pengendali."},
+{q:"Urutan yang benar pada siklus interaksi robot dengan dunia adalah…",
+ o:["Berpikir → Melihat → Bertindak → Evaluasi","Melihat → Bertindak → Berpikir → Evaluasi","Bertindak → Melihat → Evaluasi → Berpikir","Melihat → Berpikir → Bertindak → Evaluasi"],
+ a:3,e:"Siklusnya: (1) Melihat, sensor mendeteksi rintangan; (2) Berpikir, pengendali menyadari jarak tidak aman; (3) Bertindak, aktuator memutar roda untuk berbelok; (4) Evaluasi, sensor membaca kondisi baru sebagai umpan balik."},
+{q:"Sebuah robot gudang mendeteksi kotak di depannya, menyadari jarak tidak aman, lalu memutar roda untuk berbelok. Setelah itu sensor kembali membaca kondisi baru. Tahap terakhir ini disebut…",
+ o:["Melihat","Berpikir","Evaluasi (umpan balik)","Bertindak"],
+ a:2,e:"Saat sensor kembali membaca kondisi baru setelah tindakan dilakukan, robot sedang melakukan evaluasi melalui umpan balik. Hasil evaluasi menjadi masukan untuk siklus berikutnya."},
+{q:"Degrees of Freedom (DOF) adalah…",
+ o:["Jumlah baterai yang dipasang pada robot","Jumlah gerakan independen yang dapat dilakukan suatu mekanisme","Kecepatan maksimum motor penggerak","Jumlah sensor yang terpasang pada robot"],
+ a:1,e:"DOF adalah jumlah gerakan independen yang dapat dilakukan suatu mekanisme, misalnya titik engsel/sumbu pada bahu, siku, dan pergelangan tangan."},
+{q:"Apa konsekuensi dari semakin banyaknya DOF pada sebuah robot?",
+ o:["Gerakan lebih rumit dan luwes, tetapi pengendali harus bekerja jauh lebih keras untuk menghitungnya","Gerakan menjadi lebih sederhana dan perhitungan menjadi lebih ringan","Robot pasti bergerak lebih cepat tanpa tambahan beban komputasi","Tidak ada pengaruh terhadap kerja pengendali"],
+ a:0,e:"Semakin banyak titik engsel/sumbu (DOF), semakin luwes gerakan yang bisa dilakukan, namun semakin berat perhitungan yang harus ditangani pengendali."},
+{q:"Manakah ciri robot industri menurut materi?",
+ o:["Bekerja di lingkungan tak terprediksi dengan keputusan mandiri","Mengandalkan pemetaan SLAM untuk menjelajah ruang baru","Berfokus pada interaksi emosional dengan manusia","Beroperasi di ruang terstruktur dengan fokus pada kepatuhan lintasan, presisi tinggi, dan repetisi tanpa henti"],
+ a:3,e:"Robot industri beroperasi di ruang terstruktur seperti pabrik, mengutamakan kepatuhan lintasan, presisi, dan repetisi, serta memerlukan pembatas area kerja (arm sweep area) demi keselamatan pekerja."},
+{q:"Karakteristik utama robot otonom dan layanan adalah…",
+ o:["Tindakan dikodekan kaku untuk lintasan yang selalu sama","Selalu memerlukan pagar pembatas area kerja","Lingkungan berubah-ubah dan tidak dapat diprediksi, sehingga tindakan memakai sensor dan keputusan berbasis kondisi secara mandiri","Hanya dapat bekerja di sel kerja yang terstruktur"],
+ a:2,e:"Robot otonom harus bertahan di dunia manusia yang kacau dan penuh kejutan. Karena itu tindakannya tidak dikodekan kaku, melainkan memakai sensor dan keputusan berbasis kondisi."},
+{q:"Pada matriks silsilah, tantangan utama robot industri dan robot otonom secara berturut-turut adalah…",
+ o:["Presisi repetisi dan keamanan sel kerja; persepsi navigasi dan ketidakpastian lingkungan","Persepsi navigasi dan ketidakpastian lingkungan; presisi repetisi dan keamanan sel kerja","Keduanya sama-sama pada keamanan sel kerja","Keduanya sama-sama pada ketidakpastian lingkungan"],
+ a:0,e:"Robot industri menghadapi tantangan presisi repetisi dan keamanan sel kerja, sedangkan robot otonom menghadapi persepsi navigasi dan ketidakpastian lingkungan."},
+{q:"Apa pesan penutup pada matriks perbandingan robot industri vs otonom?",
+ o:["Batas keduanya mutlak dan tidak pernah berubah","Batas keduanya bisa memudar karena pabrik modern mulai menggabungkan kedua kemampuan","Robot industri sudah tidak digunakan lagi","Robot otonom tidak dapat dipakai di pabrik"],
+ a:1,e:"Materi mengingatkan bahwa batas ini bisa memudar: pabrik modern kini mulai menggabungkan ketepatan robot industri dengan kemampuan adaptif robot otonom."},
+{q:"Dalam pembedahan medis, bagaimana peran sebagian besar robot menurut materi?",
+ o:["Mengambil keputusan penuh dan menggantikan dokter","Bekerja otonom tanpa pengawasan agar lebih cepat","Berfungsi sebagai kepanjangan tangan ahli bedah dengan supervisi penuh","Hanya dipakai untuk membersihkan ruang operasi"],
+ a:2,e:"Sebagian besar robot bedah tidak mengambil keputusan mandiri. Tujuannya memaksimalkan presisi dan menjamin keselamatan pasien, bukan menggantikan peran dokter."},
+{q:"AIBO menjadi pelopor yang mengajarkan dunia bahwa…",
+ o:["Robot harus berbentuk manusia agar dapat berjalan","Robot hanya cocok digunakan di pabrik","Robot hanya dapat bekerja bila dikendalikan manual","Robot tidak harus berbentuk manusia untuk berkomunikasi"],
+ a:3,e:"AIBO, anjing peliharaan robot pertama, menunjukkan robot dapat berkomunikasi tanpa berbentuk manusia: ia mengenali pola visual/suara, memberi respons perilaku, dan membentuk ikatan emosional tiruan dengan manusia."},
+{q:"ASIMO dianggap mewakili terobosan dalam…",
+ o:["Robot pengelasan bodi mobil","Komputasi real-time untuk mobilitas humanoid: berjalan dengan dua kaki, berlari, membawa benda, dan pulih saat kehilangan keseimbangan","Pemetaan gudang menggunakan SLAM","Pembedahan jarak jauh"],
+ a:1,e:"ASIMO menunjukkan bahwa hal mudah bagi balita manusia adalah “mimpi buruk matematis” bagi robot. Terobosannya ada pada komputasi real-time untuk menjaga keseimbangan saat berjalan dua kaki."},
+{q:"QRIO memiliki 38 DOF. Pernyataan yang tepat mengenai konsekuensinya adalah…",
+ o:["Banyaknya DOF harus didukung pengolahan informasi sensor yang masif agar gerakan tidak berantakan","Sensor sebaiknya dikurangi agar gerakan lebih mulus","Robot tidak lagi memerlukan pengendali","Cukup menambah kapasitas baterai tanpa perubahan lain"],
+ a:0,e:"Insight dari studi kasus QRIO: banyak sendi memungkinkan gerakan mikro yang menyerupai tarian dan keluwesan manusia, tetapi perlu pengolahan informasi sensor (kamera, mikrofon ganda, akselerometer, sensor kemiringan) yang masif."},
+{q:"Pada SLAM (Simultaneous Localization and Mapping), robot…",
+ o:["Mengikuti lintasan tetap yang sudah diprogram di pabrik","Menggunakan pagar fisik untuk membatasi area kerjanya","Membangun peta digital ruangan yang tidak diketahui sambil memperkirakan lokasinya sendiri di dalam peta tersebut","Hanya mengandalkan kendali jarak jauh oleh operator"],
+ a:2,e:"SLAM membuat robot otonom membangun peta digital ruangan yang belum dikenal sekaligus memperkirakan posisinya sendiri pada peta itu, serta memulihkan diri jika terjadi anomali seperti tergelincir."},
+{q:"Bagaimana posisi Tiga Hukum Robotika Asimov dalam rekayasa robot nyata?",
+ o:["Menjadi standar keselamatan teknis yang ditanamkan di semua robot industri","Dapat langsung disalin menjadi kode program robot","Sama sekali tidak memiliki nilai apa pun","Bagus untuk etika filosofis, tetapi tidak bisa langsung diaplikasikan sebagai kode rekayasa"],
+ a:3,e:"Hukum Asimov adalah gagasan fiksi ilmiah. Ia berguna untuk diskusi etika, tetapi keselamatan robot nyata dicapai lewat langkah teknis yang terukur (“Safety First”), seperti pembatas area, sensor keselamatan, E-Stop, dan analisis risiko."},
+{q:"Fungsi Penghentian Darurat (E-Stop) pada protokol keselamatan robot adalah…",
+ o:["Memutus daya secara otomatis saat anomali kecepatan terdeteksi","Memetakan ruangan secara otomatis","Melatih robot mengenali wajah pengguna","Menambah jumlah DOF robot"],
+ a:0,e:"E-Stop adalah pemutusan daya otomatis ketika terdeteksi anomali kecepatan. Ia bersama pembatas area fisik, sensor keselamatan aktif, dan analisis risiko terukur membentuk elemen keselamatan teknis."},
+{q:"Pada diagram sistem zona keselamatan LIDAR, makna warna zona dari terluar sampai terdalam adalah…",
+ o:["Hijau = bahaya, kuning = peringatan, merah = aman","Hijau = aman, kuning = peringatan, merah = bahaya","Hijau = peringatan, kuning = aman, merah = bahaya","Semua zona memiliki tingkat risiko yang sama"],
+ a:1,e:"Zona hijau aman, kuning peringatan, dan merah bahaya. Laser dan LIDAR sebagai sensor keselamatan aktif mendeteksi masuknya manusia ke zona-zona ini secara instan."}
+];
+var N = Q.length, L = ["A","B","C","D"];
+var KEY = "kuis_ai_p6_robotika_";
+
+/* ================= UTIL ================= */
+function $(id){return document.getElementById(id);}
+function lsGet(k){try{return window.localStorage.getItem(k);}catch(e){return null;}}
+function lsSet(k,v){try{window.localStorage.setItem(k,v);}catch(e){}}
+function show(id){["screenStart","screenQuiz","screenResult"].forEach(function(s){$(s).classList.toggle("hidden",s!==id);});window.scrollTo(0,0);}
+function mk(tag,cls,txt){var n=document.createElement(tag);if(cls)n.className=cls;if(txt!==undefined)n.textContent=txt;return n;}
+
+var user=null, ans=[], cur=0;
+
+/* ================= MULAI ================= */
+$("formStart").addEventListener("submit",function(ev){
+  ev.preventDefault();
+  var nama=$("inNama").value.trim().replace(/\s+/g," ");
+  var nim=$("inNim").value.trim();
+  var prodi=$("inProdi").value;
+  var err=$("startErr");
+  if(nama.length<3){err.textContent="Isi nama lengkap (minimal 3 karakter).";$("inNama").focus();return;}
+  if(!/^[0-9]{5,20}$/.test(nim)){err.textContent="NIM hanya berisi angka (5–20 digit).";$("inNim").focus();return;}
+  if(!prodi){err.textContent="Pilih program studi terlebih dahulu.";$("inProdi").focus();return;}
+  err.textContent="";
+  var done=lsGet(KEY+"done_"+nim);
+  if(done){
+    try{var r=JSON.parse(done);user={nama:r.nama,nim:r.nim,prodi:r.prodi};renderResult(r);
+      openModal("NIM sudah mengerjakan","NIM "+nim+" telah menyelesaikan kuis ini. Hasil sebelumnya ditampilkan; kuis tidak dapat diulang.",null,"Mengerti");return;}catch(e){}
+  }
+  user={nama:nama,nim:nim,prodi:prodi};
+  ans=[];for(var i=0;i<N;i++)ans.push(null);
+  cur=0;
+  var p=lsGet(KEY+"prog_"+nim);
+  if(p){try{var o=JSON.parse(p);if(o&&o.ans&&o.ans.length===N){ans=o.ans;cur=Math.min(o.cur||0,N-1);}}catch(e){}}
+  startQuiz();
+});
+
+function startQuiz(){
+  $("whoBox").classList.remove("hidden");
+  $("whoName").textContent=user.nama;
+  $("whoSub").textContent="NIM "+user.nim+" · "+user.prodi;
+  buildPal();
+  show("screenQuiz");
+  renderQ();
+}
+
+function saveProg(){lsSet(KEY+"prog_"+user.nim,JSON.stringify({ans:ans,cur:cur}));}
+
+/* ================= KUIS ================= */
+function buildPal(){
+  var pal=$("pal");pal.innerHTML="";
+  for(var i=0;i<N;i++){(function(i){
+    var b=mk("button","",String(i+1));b.type="button";b.setAttribute("aria-label","Soal "+(i+1));
+    b.addEventListener("click",function(){cur=i;saveProg();renderQ();});
+    pal.appendChild(b);
+  })(i);}
+}
+function answered(){var c=0;for(var i=0;i<N;i++)if(ans[i]!==null)c++;return c;}
+function renderQ(){
+  var q=Q[cur];
+  $("qNo").textContent="Soal "+(cur+1)+" dari "+N;
+  $("qText").textContent=q.q;
+  var box=$("qOpts");box.innerHTML="";
+  q.o.forEach(function(t,i){
+    var b=mk("button","opt"+(ans[cur]===i?" sel":""));
+    b.type="button";b.setAttribute("role","radio");b.setAttribute("aria-checked",ans[cur]===i?"true":"false");
+    b.appendChild(mk("span","k",L[i]));
+    b.appendChild(mk("span","",t));
+    b.addEventListener("click",function(){ans[cur]=i;saveProg();renderQ();});
+    box.appendChild(b);
+  });
+  var a=answered();
+  $("bar").style.width=(a/N*100)+"%";
+  $("metaL").textContent="Terjawab "+a+" dari "+N;
+  $("metaR").textContent=(N-a)+" belum dijawab";
+  $("btnPrev").disabled=cur===0;
+  $("btnNext").textContent=cur===N-1?"Ke soal pertama":"Berikutnya";
+  var bs=$("pal").children;
+  for(var i=0;i<bs.length;i++){bs[i].className=(ans[i]!==null?"ans":"")+(i===cur?" now":"");}
+}
+$("btnPrev").addEventListener("click",function(){if(cur>0){cur--;saveProg();renderQ();}});
+$("btnNext").addEventListener("click",function(){cur=(cur+1)%N;saveProg();renderQ();});
+document.addEventListener("keydown",function(e){
+  if($("screenQuiz").classList.contains("hidden")||!$("modal").classList.contains("hidden"))return;
+  var t=e.target&&e.target.tagName;if(t==="INPUT"||t==="SELECT")return;
+  var k=e.key.toLowerCase(),idx=["a","b","c","d"].indexOf(k);
+  if(idx>-1){ans[cur]=idx;saveProg();renderQ();}
+  else if(e.key==="ArrowRight"){cur=Math.min(N-1,cur+1);saveProg();renderQ();}
+  else if(e.key==="ArrowLeft"){cur=Math.max(0,cur-1);saveProg();renderQ();}
+});
+
+/* ================= MODAL ================= */
+var mYesFn=null;
+function openModal(title,body,yesFn,yesLabel){
+  $("mTitle").textContent=title;$("mBody").textContent=body;
+  mYesFn=yesFn;
+  $("mYes").textContent=yesLabel||"Ya, kumpulkan";
+  $("mNo").classList.toggle("hidden",!yesFn);
+  $("modal").classList.remove("hidden");
+  $("mYes").focus();
+}
+function closeModal(){$("modal").classList.add("hidden");}
+$("mNo").addEventListener("click",closeModal);
+$("mYes").addEventListener("click",function(){var f=mYesFn;closeModal();if(f)f();});
+
+$("btnFinish").addEventListener("click",function(){
+  var left=N-answered();
+  openModal("Kumpulkan jawaban?",
+    left>0?("Masih ada "+left+" soal yang belum dijawab dan dihitung salah. Setelah dikumpulkan, jawaban tidak dapat diubah dan kuis tidak dapat diulang."):"Setelah dikumpulkan, jawaban tidak dapat diubah dan kuis tidak dapat diulang.",
+    submitQuiz);
+});
+
+/* ================= HASIL ================= */
+function submitQuiz(){
+  var ok=0;for(var i=0;i<N;i++)if(ans[i]===Q[i].a)ok++;
+  var r={nama:user.nama,nim:user.nim,prodi:user.prodi,ans:ans.slice(),ok:ok,
+    nilai:Math.round(ok/N*1000)/10,
+    tgl:new Date().toLocaleString("id-ID",{dateStyle:"full",timeStyle:"short"})};
+  lsSet(KEY+"done_"+user.nim,JSON.stringify(r));
+  try{window.localStorage.removeItem(KEY+"prog_"+user.nim);}catch(e){}
+  renderResult(r);
+}
+function predikat(n){
+  if(n>=85)return "Sangat baik";
+  if(n>=70)return "Baik";
+  if(n>=55)return "Cukup";
+  return "Perlu belajar lagi";
+}
+var lastResult=null;
+function renderResult(r){
+  lastResult=r;
+  $("whoBox").classList.remove("hidden");
+  $("whoName").textContent=r.nama;
+  $("whoSub").textContent="NIM "+r.nim+" · "+r.prodi;
+  var nil=0;r.ans.forEach(function(x){if(x===null)nil++;});
+  var bad=N-r.ok-nil;
+  $("rScore").textContent=(r.nilai%1===0?r.nilai:r.nilai.toFixed(1));
+  $("rPred").textContent="Predikat: "+predikat(r.nilai);
+  $("rNama").textContent=r.nama;$("rNim").textContent=r.nim;$("rProdi").textContent=r.prodi;$("rTgl").textContent=r.tgl;
+  $("rOk").textContent="Benar: "+r.ok;
+  $("rBad").textContent="Salah: "+bad;
+  $("rNil").textContent="Kosong: "+nil;
+  var rv=$("review");rv.innerHTML="";
+  for(var i=0;i<N;i++){
+    var q=Q[i],u=r.ans[i];
+    var st=u===null?"nil":(u===q.a?"ok":"bad");
+    var card=mk("article","rev "+st);card.setAttribute("data-st",st);
+    var h=mk("div","rev-h");
+    h.appendChild(mk("span","","Soal "+(i+1)));
+    h.appendChild(mk("span","badge "+st,st==="ok"?"Benar":(st==="bad"?"Salah":"Tidak dijawab")));
+    card.appendChild(h);
+    card.appendChild(mk("div","rq",q.q));
+    q.o.forEach(function(t,j){
+      var cls="ro"+(j===q.a?" right":(j===u?" wrong":""));
+      var row=mk("div",cls);
+      row.appendChild(mk("span","k",L[j]+"."));
+      row.appendChild(mk("span","",t));
+      if(j===q.a)row.appendChild(mk("em","",j===u?"Jawabanmu · benar":"Kunci"));
+      else if(j===u)row.appendChild(mk("em","","Jawabanmu"));
+      card.appendChild(row);
+    });
+    var w=mk("div","why");w.appendChild(mk("b","","Pembahasan: "));w.appendChild(document.createTextNode(q.e));
+    card.appendChild(w);
+    rv.appendChild(card);
+  }
+  setFilter("all");
+  show("screenResult");
+}
+function setFilter(f){
+  document.querySelectorAll(".seg").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-f")===f);});
+  document.querySelectorAll("#review .rev").forEach(function(c){
+    c.classList.toggle("hidden",f==="bad"&&c.getAttribute("data-st")==="ok");
+  });
+}
+document.querySelectorAll(".seg").forEach(function(b){b.addEventListener("click",function(){setFilter(b.getAttribute("data-f"));});});
+
+/* ================= PDF ================= */
+var oldTitle=document.title;
+$("btnPdf").addEventListener("click",function(){
+  setFilter("all");
+  if(lastResult){
+    var safe=(lastResult.nama+"_"+lastResult.nim).replace(/[^A-Za-z0-9_\-]+/g,"_");
+    document.title="Hasil_Kuis_Robotika_P6_"+safe;
+  }
+  window.print();
+});
+window.addEventListener("beforeprint",function(){setFilter("all");});
+window.addEventListener("afterprint",function(){document.title=oldTitle;});
+</script>
+</body>
+</html>
